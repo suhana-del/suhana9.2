@@ -1,0 +1,54 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class DatabaseInserter {
+
+    // Step-2: Define configuration constants for JDBC connection parameters
+    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/mydatabase";
+    private static final String USERNAME = "root";
+    private static final String PASSWORD = "password";
+
+    public static void main(String[] args) {
+        
+        // Define DDL to build out our schema automatically if missing
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS users ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                + "name VARCHAR(100) NOT NULL, "
+                + "email VARCHAR(100) NOT NULL"
+                + ")";
+
+        // Step-5: Parameterized manipulation string for secure inputs
+        String insertSQL = "INSERT INTO users (name, email) VALUES (?, ?)";
+
+        // Step-3: Set up automatic asset management with try-with-resources
+        try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
+             Statement statement = connection.createStatement();
+             PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+
+            // Step-4: Ensure structural foundation table is configured
+            statement.executeUpdate(createTableSQL);
+
+            // Step-6: Populate parameters and push record one
+            preparedStatement.setString(1, "John Doe");
+            preparedStatement.setString(2, "johndoe@example.com");
+            preparedStatement.executeUpdate();
+
+            // Step-7: Reset parameters and push record two
+            preparedStatement.setString(1, "Jane Doe");
+            preparedStatement.setString(2, "janedoe@example.com");
+            preparedStatement.executeUpdate();
+
+            // Step-8: Display clean processing signal
+            System.out.println("Data inserted successfully.");
+
+        } catch (SQLException e) {
+            // Step-9: Catch anomalies like schema violations or connectivity issues
+            System.err.println("Database processing issue encountered!");
+            System.err.println("Error details: " + e.getMessage());
+        }
+        // Step-10: Statement, Connection, and PreparedStatement structures automatically clean up here.
+    }
+}
